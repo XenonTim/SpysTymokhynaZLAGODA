@@ -12,13 +12,22 @@
 
     <ul class="nav align-items-center">
       <li class="nav-item me-2">
-        <a href="#" class="nav-link header-icon-link px-2 fs-4" title="Профіль користувача">
-          <i class="bi bi-person-circle"></i>
-        </a>
+        <c:choose>
+          <c:when test="${empty param.page || param.page == 'profile'}">
+            <a href="${pageContext.request.contextPath}/index.jsp" class="nav-link header-icon-link active-profile px-2 fs-4" title="Профіль користувача (Поточна сторінка)">
+              <i class="bi bi-person-circle"></i>
+            </a>
+          </c:when>
+          <c:otherwise>
+            <a href="${pageContext.request.contextPath}/index.jsp" class="nav-link header-icon-link px-2 fs-4" title="Профіль користувача">
+              <i class="bi bi-person-circle"></i>
+            </a>
+          </c:otherwise>
+        </c:choose>
       </li>
 
       <li class="nav-item">
-        <a href="#" class="nav-link logout-link fw-semibold px-3 py-2 d-flex align-items-center" title="Вийти з АІС">
+        <a href="${pageContext.request.contextPath}/auth_page.jsp" class="nav-link logout-link fw-semibold px-3 py-2 d-flex align-items-center" title="Вийти з АІС">
           <i class="bi bi-box-arrow-right me-2"></i> Вихід
         </a>
       </li>
