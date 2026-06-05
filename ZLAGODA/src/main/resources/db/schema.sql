@@ -43,6 +43,13 @@ zip_code VARCHAR(9) NOT NULL,
 PRIMARY KEY (id_employee)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE User_Auth (
+id_employee INT(11) NOT NULL,
+password_hash VARCHAR(255) NOT NULL,
+PRIMARY KEY (id_employee),
+CONSTRAINT fk_auth_employee FOREIGN KEY (id_employee) REFERENCES Employee (id_employee) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `Check` (
 check_number INT(11) NOT NULL AUTO_INCREMENT,
 id_employee INT(11) NOT NULL,
