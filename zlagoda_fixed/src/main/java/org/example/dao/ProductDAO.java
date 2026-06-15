@@ -46,7 +46,7 @@ public class ProductDAO {
         return list;
     }
 
-    /** Пошук товарів певної категорії, відсортованих за назвою (вимога п.13, п.5 касира) */
+    /** Пошук товарів певної категорії, відсортованих за назвою. */
     public List<Product> getProductsByCategory(int categoryNum) {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.id_product, p.category_number, c.category_name, p.product_name, p.characteristics " +

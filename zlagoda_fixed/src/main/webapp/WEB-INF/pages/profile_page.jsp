@@ -27,7 +27,7 @@
                 </div>
                 <div class="col-sm-6">
                   <span class="text-muted d-block">Salary:</span>
-                  <strong>${user.salary} грн</strong>
+                  <strong>${user.salary} UAH</strong>
                 </div>
                 <div class="col-sm-6">
                   <span class="text-muted d-block">Phone number:</span>

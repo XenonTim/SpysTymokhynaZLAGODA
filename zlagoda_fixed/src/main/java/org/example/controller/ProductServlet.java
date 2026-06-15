@@ -14,8 +14,8 @@ import java.util.List;
 
 /**
  * Товари (Product).
- * МЕНЕДЖЕР: CRUD + пошук по категорії (п.9, п.13).
- * КАСИР: перегляд, пошук по назві та категорії (п.1, п.4, п.5).
+ * МЕНЕДЖЕР: CRUD + пошук по категорії.
+ * КАСИР: перегляд, пошук по назві та категорії.
  */
 @WebServlet("/products")
 public class ProductServlet extends HttpServlet {
@@ -33,10 +33,9 @@ public class ProductServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        // CRUD — лише менеджер
         if ("delete".equals(action) || "new".equals(action) || "edit".equals(action)) {
-            if (!"Менеджер".equals(role)) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Тільки менеджер може змінювати товари");
+            if (!"Manager".equals(role)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only management is authorised to edit products");
                 return;
             }
             if ("delete".equals(action)) {
@@ -49,7 +48,6 @@ public class ProductServlet extends HttpServlet {
             return;
         }
 
-        // Пошук товарів за категорією (вимога п.13, п.5)
         String categoryParam = request.getParameter("category");
         List<Product> products;
         if (categoryParam != null && !categoryParam.isBlank()) {
@@ -71,7 +69,7 @@ public class ProductServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (!"Менеджер".equals(getRole(request))) {
+        if (!"Manager".equals(getRole(request))) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -115,20 +113,20 @@ public class ProductServlet extends HttpServlet {
                       <input type="hidden" name="action" value="%s">
                       %s
                       <div class="col-md-4">
-                        <label class="form-label">Категорія</label>
+                        <label class="form-label">Category</label>
                         <select class="form-select" name="category_number" required>%s</select>
                       </div>
                       <div class="col-md-8">
-                        <label class="form-label">Назва товару</label>
+                        <label class="form-label">Product name</label>
                         <input class="form-control" name="product_name" required value="%s">
                       </div>
                       <div class="col-12">
-                        <label class="form-label">Характеристики</label>
+                        <label class="form-label">Characteristics</label>
                         <textarea class="form-control" name="characteristics" rows="3" required>%s</textarea>
                       </div>
                       <div class="col-12 d-flex gap-2">
-                        <button class="btn btn-primary" type="submit">Зберегти</button>
-                        <a class="btn btn-outline-secondary" href="products">Скасувати</a>
+                        <button class="btn btn-primary" type="submit">Save</button>
+                        <a class="btn btn-outline-secondary" href="products">Cancel</a>
                       </div>
                     </form>
                   </div>
@@ -136,7 +134,7 @@ public class ProductServlet extends HttpServlet {
                 """.formatted(action, hiddenId, options,
                 product == null ? "" : HtmlPage.esc(product.getProductName()),
                 product == null ? "" : HtmlPage.esc(product.getCharacteristics()));
-        HtmlPage.render(response, product == null ? "Новий товар" : "Редагування товару",
+        HtmlPage.render(response, product == null ? "New product" : "Edit product",
                 body, request.getContextPath() + "/products");
     }
 

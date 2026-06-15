@@ -18,7 +18,7 @@ public class CustomerCardDAO {
     }
 
     /**
-     * Пошук карток з необов'язковим фільтром по відсотку (вимога менеджера п.12).
+     * Пошук карток з необов'язковим фільтром по відсотку.
      * @param percentFilter якщо != null — показати лише клієнтів з цим відсотком
      */
     public List<CustomerCard> searchCards(String query, Integer percentFilter, String sortBy) {

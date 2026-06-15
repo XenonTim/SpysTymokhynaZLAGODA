@@ -14,7 +14,7 @@
 
     <%@ include file="/WEB-INF/sidebar.jsp" %>
 
-    <main class="flex-grow-1 p-4 bg-white">
+    <main class="flex-grow-1 p-4 bg-white" style="margin-left: 280px;">
         <c:choose>
             <c:when test="${param.page == 'categories'}">
                 <jsp:include page="/WEB-INF/pages/category_page.jsp" />

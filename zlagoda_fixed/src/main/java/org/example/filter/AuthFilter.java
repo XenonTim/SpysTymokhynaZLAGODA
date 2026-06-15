@@ -43,7 +43,7 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        // Відновлюємо/синхронізуємо об'єкт користувача та роль на КОЖЕН запит
+        // Відновлюємо/синхронізуємо об'єкт користувача та роль на кожен запит
         Object currentUser = session.getAttribute("user");
         if (currentUser instanceof Employee employee) {
             req.setAttribute("user", employee);

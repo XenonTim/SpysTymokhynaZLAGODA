@@ -11,8 +11,8 @@ import java.io.IOException;
 
 /**
  * Категорії товарів.
- * МЕНЕДЖЕР: CRUD (п.1, п.2, п.3, п.8)
- * КАСИР: лише перегляд (неявно через list)
+ * МЕНЕДЖЕР: CRUD.
+ * КАСИР: лише перегляд.
  */
 @WebServlet("/categories")
 public class CategoryServlet extends HttpServlet {
@@ -25,8 +25,8 @@ public class CategoryServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("delete".equals(action) || "new".equals(action) || "edit".equals(action)) {
-            if (!"Менеджер".equals(role)) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Тільки менеджер може змінювати категорії");
+            if (!"Manager".equals(role)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only management is authorised to edit categories");
                 return;
             }
             if ("delete".equals(action)) {
@@ -46,7 +46,7 @@ public class CategoryServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (!"Менеджер".equals(getRole(request))) {
+        if (!"Manager".equals(getRole(request))) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -77,19 +77,19 @@ public class CategoryServlet extends HttpServlet {
                       <input type="hidden" name="action" value="%s">
                       %s
                       <div class="col-12">
-                        <label class="form-label">Назва категорії</label>
+                        <label class="form-label">Category name</label>
                         <input class="form-control" name="category_name" required value="%s">
                       </div>
                       <div class="col-12 d-flex gap-2">
-                        <button class="btn btn-primary" type="submit">Зберегти</button>
-                        <a class="btn btn-outline-secondary" href="categories">Скасувати</a>
+                        <button class="btn btn-primary" type="submit">Save</button>
+                        <a class="btn btn-outline-secondary" href="categories">Cancel</a>
                       </div>
                     </form>
                   </div>
                 </div>
                 """.formatted(action, idField, category == null ? "" : HtmlPage.esc(category.getCategoryName()));
         HtmlPage.render(response,
-                category == null ? "Нова категорія" : "Редагування категорії",
+                category == null ? "New category" : "Category edit",
                 body, request.getContextPath() + "/categories");
     }
 

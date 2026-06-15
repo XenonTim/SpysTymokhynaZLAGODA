@@ -23,16 +23,16 @@ INSERT INTO Customer_Card (cust_surname,cust_name,cust_patronymic,phone_number,c
 ('Melnyk','Oleh','Serhiiovych','+380635006074','Lviv','Svaromska','12040',5,1010);
 
 INSERT INTO Employee (empl_surname,empl_name,empl_patronymic,empl_role,salary,date_of_birth,date_of_start,phone_number,city,street,zip_code,id_employee) VALUES
-('Kovalenko','Ivan','Mykolaiovych','Менеджер',25000,'1990-05-15 00:00:00.000000','2020-01-10 00:00:00.000000','+380971112233','Kyiv','Umanska','11735',101),
-('Melnyk','Olha','Petrivna','Касир',22000,'1995-08-20 00:00:00.000000','2021-03-15 00:00:00.000000','+380932223344','Kyiv','Harazhna','10304',102),
-('Tkachenko','Andrii','Ivanovych','Касир',19000,'1988-12-02 00:00:00.000000','2019-11-05 00:00:00.000000','+380503334455','Kyiv','Trukhanivska','11711',103),
-('Shevchenko','Mariia','Vasylivna','Касир',21000,'1992-03-25 00:00:00.000000','2022-06-01 00:00:00.000000','+380674445566','Kyiv','Borova','10184',104),
-('Bondarenko','Serhii','Oleksandrovych','Касир',19500,'1997-07-10 00:00:00.000000','2023-01-20 00:00:00.000000','+380985556677','Kyiv','Telihy Oleny','11663',105),
-('Kravchenko','Olena','Dmytrivna','Менеджер',23000,'1991-11-30 00:00:00.000000','2020-09-12 00:00:00.000000','+380636667788','Kyiv','Zelena','12449',106),
-('Oliinyk','Viktor','Serhiiovych','Касир',20000,'1985-04-14 00:00:00.000000','2018-05-25 00:00:00.000000','+380507778899','Kyiv','Shosta','12573',107),
-('Polishchuk','Anna','Ihorivna','Касир',22500,'1994-09-05 00:00:00.000000','2021-10-10 00:00:00.000000','+380678889900','Kyiv','Honcharna','10353',108),
-('Savchenko','Tetiana','Volodymyrivna','Касир',18500,'1999-01-18 00:00:00.000000','2024-02-01 00:00:00.000000','+380939990011','Kyiv','Dachna','12636',109),
-('Moroz','Dmytro','Yuriiovych','Менеджер',24000,'1989-06-22 00:00:00.000000','2019-02-28 00:00:00.000000','+380980001122','Kyiv','Yasenevyi','11961',110);
+('Kovalenko','Ivan','Mykolaiovych','Manager',25000,'1990-05-15 00:00:00.000000','2020-01-10 00:00:00.000000','+380971112233','Kyiv','Umanska','11735',101),
+('Melnyk','Olha','Petrivna','Cashier',22000,'1995-08-20 00:00:00.000000','2021-03-15 00:00:00.000000','+380932223344','Kyiv','Harazhna','10304',102),
+('Tkachenko','Andrii','Ivanovych','Cashier',19000,'1988-12-02 00:00:00.000000','2019-11-05 00:00:00.000000','+380503334455','Kyiv','Trukhanivska','11711',103),
+('Shevchenko','Mariia','Vasylivna','Cashier',21000,'1992-03-25 00:00:00.000000','2022-06-01 00:00:00.000000','+380674445566','Kyiv','Borova','10184',104),
+('Bondarenko','Serhii','Oleksandrovych','Cashier',19500,'1997-07-10 00:00:00.000000','2023-01-20 00:00:00.000000','+380985556677','Kyiv','Telihy Oleny','11663',105),
+('Kravchenko','Olena','Dmytrivna','Manager',23000,'1991-11-30 00:00:00.000000','2020-09-12 00:00:00.000000','+380636667788','Kyiv','Zelena','12449',106),
+('Oliinyk','Viktor','Serhiiovych','Cashier',20000,'1985-04-14 00:00:00.000000','2018-05-25 00:00:00.000000','+380507778899','Kyiv','Shosta','12573',107),
+('Polishchuk','Anna','Ihorivna','Cashier',22500,'1994-09-05 00:00:00.000000','2021-10-10 00:00:00.000000','+380678889900','Kyiv','Honcharna','10353',108),
+('Savchenko','Tetiana','Volodymyrivna','Cashier',18500,'1999-01-18 00:00:00.000000','2024-02-01 00:00:00.000000','+380939990011','Kyiv','Dachna','12636',109),
+('Moroz','Dmytro','Yuriiovych','Manager',24000,'1989-06-22 00:00:00.000000','2019-02-28 00:00:00.000000','+380980001122','Kyiv','Yasenevyi','11961',110);
 
 INSERT INTO Product (category_number,id_product,product_name,characteristics) VALUES
 (1,101,'Chicken drumsticks','1kg'),

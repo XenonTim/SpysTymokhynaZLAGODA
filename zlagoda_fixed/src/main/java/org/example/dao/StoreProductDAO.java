@@ -20,7 +20,7 @@ public class StoreProductDAO {
 
     /**
      * Пошук товарів з необов'язковим фільтром isPromotional.
-     * Сортування: за кількістю АБО за назвою — відповідно до вимог п.15, п.16 менеджера та п.12, п.13 касира.
+     * Сортування: за кількістю АБО за назвою.
      *
      * @param promotionalFilter null — всі; true — лише акційні; false — лише неакційні
      */
@@ -54,7 +54,7 @@ public class StoreProductDAO {
             case "price_asc"   -> sql.append("sp.selling_price ASC");
             case "number_asc"  -> sql.append("sp.products_number ASC");
             case "upc"         -> sql.append("sp.UPC ASC");
-            default            -> sql.append("sp.products_number DESC"); // number_desc
+            default            -> sql.append("sp.products_number DESC");
         }
 
         try (Connection conn = DBManager.getConnection();
@@ -70,7 +70,7 @@ public class StoreProductDAO {
     }
 
     /**
-     * За UPC повертає ціну продажу, кількість, назву та характеристики товару (вимога п.14 менеджера та п.14 касира).
+     * За UPC повертає ціну продажу, кількість, назву та характеристики товару.
      */
     public StoreProduct getByUpc(String upc) {
         String sql = "SELECT sp.UPC, sp.UPC_prom, sp.id_product, p.product_name, p.characteristics, " +
@@ -82,9 +82,6 @@ public class StoreProductDAO {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     StoreProduct sp = mapStoreProduct(rs);
-                    // characteristics — зберігаємо в окреме поле ProductName-розширення через toString,
-                    // або використаємо productCharacteristics поле моделі якщо є.
-                    // Якщо немає — додаємо характеристики до productName для відображення
                     String chars = rs.getString("characteristics");
                     if (chars != null && !chars.isBlank()) {
                         sp.setProductName(sp.getProductName() + " [" + chars + "]");

@@ -22,22 +22,19 @@ public class LoginServlet extends HttpServlet {
 
         Employee emp = employeeDAO.getEmployeeForAuth(empId);
 
-        // ВАЖЛИВО: додано перевірку emp.getPasswordHash() != null, щоб уникнути "білого екрану смерті"
         if (emp != null && emp.getPasswordHash() != null && PasswordUtil.verifyPassword(password, emp.getPasswordHash())) {
             HttpSession session = request.getSession(true);
             session.setAttribute("user", emp);
             session.setAttribute("userId", emp.getIdEmployee());
             session.setAttribute("userRole", emp.getEmplRole());
 
-            // Якщо це менеджер — кидаємо на категорії, якщо касир — на чеки
-            String redirect = "Менеджер".equals(emp.getEmplRole())
-                    ? request.getContextPath() + "/categories"
-                    : request.getContextPath() + "/checks";
+            // Усіх користувачів відправляємо на сторінку профілю
+            String redirect = request.getContextPath() + "/";
             response.sendRedirect(redirect);
             return;
         }
 
-        request.setAttribute("error", "Невірний логін або пароль");
+        request.setAttribute("error", "Invalid login and/or password");
         request.getRequestDispatcher("/auth_page.jsp").forward(request, response);
     }
 }

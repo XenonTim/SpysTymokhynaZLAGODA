@@ -20,7 +20,7 @@ public class CheckDAO {
     }
 
     /**
-     * Пошук чеків з фільтрами по касиру та/або датам (вимога менеджера п.17, п.18; касира п.9, п.10).
+     * Пошук чеків з фільтрами по касиру та/або датам.
      *
      * @param employeeIdFilter ID касира, або null для всіх
      * @param dateFrom         початок діапазону (включно), або null
@@ -53,7 +53,6 @@ public class CheckDAO {
             params.add(dateFrom);
         }
         if (dateTo != null) {
-            // до кінця дня
             conditions.add("c.print_date <= ?");
             params.add(dateTo);
         }
@@ -124,8 +123,8 @@ public class CheckDAO {
     }
 
     /**
-     * Загальна сума продажів чеків певного касира за певний период (вимога менеджера п.19).
-     * Якщо employeeId == null — сума всіх касирів (вимога п.20).
+     * Загальна сума продажів чеків певного касира за певний период.
+     * Якщо employeeId == null — сума всіх касирів.
      */
     public BigDecimal getTotalSumByPeriod(String employeeId, Timestamp dateFrom, Timestamp dateTo) {
         StringBuilder sql = new StringBuilder("SELECT COALESCE(SUM(sum_total), 0) FROM `Check` WHERE 1=1");
@@ -150,7 +149,7 @@ public class CheckDAO {
     }
 
     /**
-     * Загальна кількість одиниць певного товару (за UPC), проданого за певний період (вимога менеджера п.21).
+     * Загальна кількість одиниць певного товару (за UPC), проданого за певний період.
      */
     public int getTotalUnitsSoldByPeriod(String upc, Timestamp dateFrom, Timestamp dateTo) {
         StringBuilder sql = new StringBuilder(
@@ -202,7 +201,7 @@ public class CheckDAO {
                     if (keys.next()) {
                         generatedCheckNumber = String.valueOf(keys.getLong(1));
                     } else {
-                        throw new SQLException("Не вдалося отримати номер чеку");
+                        throw new SQLException("Failed to get check number");
                     }
                 }
             }
@@ -227,7 +226,7 @@ public class CheckDAO {
                 int[] stockUpdates = stockStmt.executeBatch();
                 for (int upd : stockUpdates) {
                     if (upd == 0) {
-                        throw new SQLException("Недостатня кількість товару на складі");
+                        throw new SQLException("Not enough product in stock");
                     }
                 }
             }

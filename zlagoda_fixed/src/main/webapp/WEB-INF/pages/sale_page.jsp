@@ -32,7 +32,7 @@
         </div>
 
         <div class="col-md-2 text-md-end">
-          <c:if test="${sessionScope.userRole == 'Менеджер'}">
+          <c:if test="${sessionScope.userRole == 'Manager'}">
             <a href="sales?action=new" class="btn btn-success w-100">
               <i class="bi bi-plus-circle me-1"></i> Add Sale Item
             </a>
@@ -63,7 +63,7 @@
             <td>${sale.selling_price} UAH</td>
             <td class="text-end no-print">
               <c:choose>
-                <c:when test="${sessionScope.userRole == 'Менеджер'}">
+                <c:when test="${sessionScope.userRole == 'Manager'}">
                   <a href="sales?action=edit&check=${sale.check_number}&upc=${sale.UPC}" class="btn btn-sm btn-outline-warning me-1" title="Edit"><i class="bi bi-pencil"></i></a>
                   <a href="sales?action=delete&check=${sale.check_number}&upc=${sale.UPC}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this item from the check?')" title="Delete"><i class="bi bi-trash"></i></a>
                 </c:when>

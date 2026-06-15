@@ -32,7 +32,7 @@
         </div>
 
         <div class="col-md-2 text-md-end">
-          <c:if test="${sessionScope.userRole == 'Менеджер'}">
+          <c:if test="${sessionScope.userRole == 'Manager'}">
             <a href="categories?action=new" class="btn btn-success w-100">
               <i class="bi bi-plus-circle me-1"></i> Add
             </a>
@@ -59,7 +59,7 @@
             <td>${cat.category_name}</td>
             <td class="text-end no-print">
               <c:choose>
-                <c:when test="${sessionScope.userRole == 'Менеджер'}">
+                <c:when test="${sessionScope.userRole == 'Manager'}">
                   <a href="categories?action=edit&id=${cat.category_number}" class="btn btn-sm btn-outline-warning me-1" title="Edit"><i class="bi bi-pencil"></i></a>
                   <a href="categories?action=delete&id=${cat.category_number}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this category?')" title="Delete"><i class="bi bi-trash"></i></a>
                 </c:when>

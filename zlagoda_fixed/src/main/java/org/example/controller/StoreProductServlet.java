@@ -14,8 +14,8 @@ import java.util.List;
 
 /**
  * Товари у магазині (Store_Product).
- * МЕНЕДЖЕР: CRUD, фільтрація акційних/неакційних по кількості та назві (п.10, п.15, п.16)
- * КАСИР: лише перегляд, фільтрація акційних/неакційних (п.2, п.12, п.13, п.14)
+ * МЕНЕДЖЕР: CRUD, фільтрація акційних/неакційних по кількості та назві.
+ * КАСИР: лише перегляд, фільтрація акційних/неакційних.
  */
 @WebServlet("/store-products")
 public class StoreProductServlet extends HttpServlet {
@@ -33,26 +33,23 @@ public class StoreProductServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        // CRUD — лише менеджер
         if ("delete".equals(action)) {
-            if (!"Менеджер".equals(role)) { response.sendError(HttpServletResponse.SC_FORBIDDEN); return; }
+            if (!"Manager".equals(role)) { response.sendError(HttpServletResponse.SC_FORBIDDEN); return; }
             storeProductDAO.deleteStoreProduct(request.getParameter("id"));
             response.sendRedirect(request.getContextPath() + "/store-products");
             return;
         }
         if ("new".equals(action) || "edit".equals(action)) {
-            if (!"Менеджер".equals(role)) { response.sendError(HttpServletResponse.SC_FORBIDDEN); return; }
+            if (!"Manager".equals(role)) { response.sendError(HttpServletResponse.SC_FORBIDDEN); return; }
             renderForm(request, response, "edit".equals(action) ? storeProductDAO.getByUpc(request.getParameter("id")) : null, null);
             return;
         }
 
-        // Фільтр акційних/неакційних (п.15, п.16 менеджера; п.12, п.13 касира)
         Boolean promotionalFilter = null;
         String promoParam = request.getParameter("promo");
         if ("true".equals(promoParam))  promotionalFilter = Boolean.TRUE;
         if ("false".equals(promoParam)) promotionalFilter = Boolean.FALSE;
 
-        // За UPC знайти деталі (п.14 менеджера та касира)
         if ("lookup".equals(action)) {
             String upc = request.getParameter("upc");
             StoreProduct sp = storeProductDAO.getByUpc(upc);
@@ -70,8 +67,8 @@ public class StoreProductServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (!"Менеджер".equals(getRole(request))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Редагування товарів лише для менеджера");
+        if (!"Manager".equals(getRole(request))) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only management is authorised to edit products");
             return;
         }
         String action = request.getParameter("action");
@@ -97,22 +94,16 @@ public class StoreProductServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/store-products");
     }
 
-    /**
-     * Перевірка: ціна та кількість не можуть бути від'ємними (корпоративне обмеження цілісності).
-     * Для акційного товару ціна автоматично перераховується як 80% від ціни базового товару
-     * (знижка 20%, п.2.1.2.1 "Товар у магазині").
-     */
     private String validate(StoreProduct sp) {
         if (sp.getSellingPrice() == null || sp.getSellingPrice().signum() < 0) {
-            return "Ціна продажу не може бути від'ємною.";
+            return "Selling price must be greater than or equal to zero.";
         }
         if (sp.getProductsNumber() < 0) {
-            return "Кількість одиниць товару не може бути від'ємною.";
+            return "Product number must be greater than or equal to zero.";
         }
         if (sp.isPromotionalProduct() && sp.getUpcProm() != null) {
             StoreProduct base = storeProductDAO.getByUpc(sp.getUpcProm());
             if (base != null && base.getSellingPrice() != null) {
-                // Акційна ціна = ціна базового товару * 0.8 (знижка 20%)
                 sp.setSellingPrice(base.getSellingPrice()
                         .multiply(new java.math.BigDecimal("0.8"))
                         .setScale(2, java.math.RoundingMode.HALF_UP));
@@ -155,31 +146,31 @@ public class StoreProductServlet extends HttpServlet {
                       <input type="hidden" name="action" value="%s">
                       %s
                       <div class="col-md-4">
-                        <label class="form-label">UPC звичайного товару (для акційного)</label>
-                        <input class="form-control" name="upc_prom" value="%s" placeholder="Порожньо = немає">
+                        <label class="form-label">non-discounted product UPC</label>
+                        <input class="form-control" name="upc_prom" value="%s" placeholder="NA">
                       </div>
                       <div class="col-md-8">
-                        <label class="form-label">Товар</label>
+                        <label class="form-label">Product</label>
                         <select class="form-select" name="id_product" required>%s</select>
                       </div>
                       <div class="col-md-4">
-                        <label class="form-label">Ціна продажу (включаючи ПДВ 20%%)</label>
+                        <label class="form-label">Selling price (VAT included)</label>
                         <input class="form-control" name="selling_price" type="number" step="0.01" min="0" required value="%s">
-                        <div class="form-text">Для акційного товару ціна автоматично перерахується як 80%% від ціни звичайного (знижка 20%%).</div>
+                        <div class="form-text">For discounted products price includes %%20 off.</div>
                       </div>
                       <div class="col-md-4">
-                        <label class="form-label">Кількість одиниць</label>
+                        <label class="form-label">Amount</label>
                         <input class="form-control" name="products_number" type="number" min="0" required value="%s">
                       </div>
                       <div class="col-md-4 d-flex align-items-end">
                         <div class="form-check">
                           <input class="form-check-input" type="checkbox" name="promotional_product" id="promoChk" %s>
-                          <label class="form-check-label" for="promoChk">Акційний товар (ціна = -20%% від звичайного)</label>
+                          <label class="form-check-label" for="promoChk">Discounted product</label>
                         </div>
                       </div>
                       <div class="col-12 d-flex gap-2">
-                        <button class="btn btn-primary" type="submit">Зберегти</button>
-                        <a class="btn btn-outline-secondary" href="store-products">Скасувати</a>
+                        <button class="btn btn-primary" type="submit">Save</button>
+                        <a class="btn btn-outline-secondary" href="store-products">Cancel</a>
                       </div>
                     </form>
                   </div>
@@ -190,27 +181,26 @@ public class StoreProductServlet extends HttpServlet {
                 product == null ? "" : HtmlPage.esc(product.getSellingPrice()),
                 product == null ? "0" : HtmlPage.esc(product.getProductsNumber()),
                 product != null && product.isPromotionalProduct() ? "checked" : "");
-        HtmlPage.render(response, product == null ? "Новий товар у магазині" : "Редагування товару у магазині",
+        HtmlPage.render(response, product == null ? "New product in store" : "Edit product in store",
                 body, request.getContextPath() + "/store-products");
     }
 
-    /** Пошук за UPC — інформаційна сторінка (п.14) */
     private void renderUpcLookup(HttpServletRequest request, HttpServletResponse response,
                                  StoreProduct sp, String upc) throws IOException {
         String body;
         if (sp == null) {
-            body = "<div class=\"alert alert-warning\">Товар з UPC «" + HtmlPage.esc(upc) + "» не знайдено.</div>";
+            body = "<div class=\"alert alert-warning\">Product with UPC «" + HtmlPage.esc(upc) + "» not found.</div>";
         } else {
             body = """
                     <div class="card shadow-sm">
                       <div class="card-body">
-                        <h5>Інформація про товар за UPC</h5>
+                        <h5>Information about product by UPC</h5>
                         <dl class="row">
                           <dt class="col-sm-3">UPC</dt><dd class="col-sm-9">%s</dd>
-                          <dt class="col-sm-3">Назва / характеристики</dt><dd class="col-sm-9">%s</dd>
-                          <dt class="col-sm-3">Ціна продажу</dt><dd class="col-sm-9">%s грн</dd>
-                          <dt class="col-sm-3">Кількість в наявності</dt><dd class="col-sm-9">%s</dd>
-                          <dt class="col-sm-3">Акційний</dt><dd class="col-sm-9">%s</dd>
+                          <dt class="col-sm-3">Name / Characteristics</dt><dd class="col-sm-9">%s</dd>
+                          <dt class="col-sm-3">Selling price</dt><dd class="col-sm-9">%s грн</dd>
+                          <dt class="col-sm-3">Amount available</dt><dd class="col-sm-9">%s</dd>
+                          <dt class="col-sm-3">Discounted</dt><dd class="col-sm-9">%s</dd>
                         </dl>
                       </div>
                     </div>
@@ -219,9 +209,9 @@ public class StoreProductServlet extends HttpServlet {
                     HtmlPage.esc(sp.getProductName()),
                     HtmlPage.esc(sp.getSellingPrice()),
                     HtmlPage.esc(sp.getProductsNumber()),
-                    sp.isPromotionalProduct() ? "✅ Так" : "❌ Ні");
+                    sp.isPromotionalProduct() ? "✅ Yes" : "❌ No");
         }
-        HtmlPage.render(response, "Пошук за UPC", body, request.getContextPath() + "/store-products");
+        HtmlPage.render(response, "Search by UPC", body, request.getContextPath() + "/store-products");
     }
 
     private String getRole(HttpServletRequest request) {

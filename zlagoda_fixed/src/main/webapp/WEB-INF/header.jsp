@@ -11,14 +11,14 @@
     <ul class="nav align-items-center">
       <li class="nav-item me-2">
         <a href="${pageContext.request.contextPath}/index.jsp"
-           class="nav-link header-icon-link px-2 fs-4" title="Профіль">
+           class="nav-link header-icon-link px-2 fs-4" title="Profile">
           <i class="bi bi-person-circle"></i>
         </a>
       </li>
       <li class="nav-item">
         <a href="${pageContext.request.contextPath}/logout"
-           class="nav-link logout-link fw-semibold px-3 py-2 d-flex align-items-center" title="Вийти">
-          <i class="bi bi-box-arrow-right me-2"></i> Вихід
+           class="nav-link logout-link fw-semibold px-3 py-2 d-flex align-items-center" title="Log-out">
+          <i class="bi bi-box-arrow-right me-2"></i> Log-out
         </a>
       </li>
     </ul>

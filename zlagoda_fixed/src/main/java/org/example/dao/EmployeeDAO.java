@@ -34,7 +34,7 @@ public class EmployeeDAO {
     }
 
     public List<Employee> getCashiersSorted() {
-        return searchEmployees(null, "Касир", "surname_asc");
+        return searchEmployees(null, "Cashier", "surname_asc");
     }
 
     public List<Employee> searchEmployees(String query, String roleFilter, String sortBy) {
@@ -118,7 +118,6 @@ public class EmployeeDAO {
                 }
                 generatedId = emp.getIdEmployee();
             } else {
-                // AUTO_INCREMENT — зчитуємо згенерований ID
                 try (PreparedStatement stmt = conn.prepareStatement(insertAutoId, Statement.RETURN_GENERATED_KEYS)) {
                     setCommonEmployeeFields(stmt, emp, 1);
                     stmt.executeUpdate();
@@ -127,7 +126,7 @@ public class EmployeeDAO {
                             generatedId = String.valueOf(keys.getLong(1));
                             emp.setIdEmployee(generatedId);
                         } else {
-                            throw new SQLException("Не вдалося отримати згенерований ID працівника");
+                            throw new SQLException("Failed to get generated Employee ID");
                         }
                     }
                 }
@@ -211,9 +210,8 @@ public class EmployeeDAO {
         return false;
     }
 
-    // --- Допоміжні методи ---
+    // Допоміжні методи
 
-    /** Встановлює поля починаючи з startIndex (без id_employee) */
     private void setCommonEmployeeFields(PreparedStatement stmt, Employee emp, int startIndex) throws SQLException {
         int i = startIndex;
         stmt.setString(i++, emp.getEmplSurname());

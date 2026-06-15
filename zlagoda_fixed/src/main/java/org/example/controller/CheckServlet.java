@@ -23,8 +23,8 @@ import java.util.List;
 
 /**
  * Чеки.
- * МЕНЕДЖЕР: перегляд, пошук за датою/касиром, видалення, агрегатні запити (п.17–21).
- * КАСИР: створення чеків, перегляд своїх чеків (п.7, п.9, п.10, п.11).
+ * МЕНЕДЖЕР: перегляд, пошук за датою/касиром, видалення, агрегатні запити.
+ * КАСИР: створення чеків, перегляд своїх чеків.
  */
 @WebServlet("/checks")
 public class CheckServlet extends HttpServlet {
@@ -44,10 +44,9 @@ public class CheckServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        // Видалення — лише менеджер (вимога: "Всі права на вилучення даних надаються менеджеру")
         if ("delete".equals(action)) {
-            if (!"Менеджер".equals(role)) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Видалення чеків лише для менеджера");
+            if (!"Manager".equals(role)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only management is authorised to delete checks");
                 return;
             }
             checkDAO.deleteCheck(request.getParameter("id"));
@@ -55,25 +54,22 @@ public class CheckServlet extends HttpServlet {
             return;
         }
 
-        // Форма нового чеку — лише касир
         if ("new".equals(action)) {
-            if (!"Касир".equals(role)) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Створення чеків лише для касира");
+            if (!"Cashier".equals(role)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only cashiers are authorised to create new checks");
                 return;
             }
             renderCreateCheckForm(request, response, null);
             return;
         }
 
-        // Перегляд конкретного чеку — всі авторизовані
         if ("view".equals(action)) {
             renderDetail(request, response, request.getParameter("id"));
             return;
         }
 
-        // Агрегатні звіти — лише менеджер (п.19, п.20, п.21)
         if ("stats".equals(action)) {
-            if (!"Менеджер".equals(role)) {
+            if (!"Manager".equals(role)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
@@ -81,13 +77,11 @@ public class CheckServlet extends HttpServlet {
             return;
         }
 
-        // Список чеків
         String employeeId = request.getParameter("employeeId");
         String dateFromStr = request.getParameter("dateFrom");
         String dateToStr   = request.getParameter("dateTo");
 
-        // Касир бачить лише свої чеки (п.9, п.10)
-        if ("Касир".equals(role)) {
+        if ("Cashier".equals(role)) {
             HttpSession session = request.getSession(false);
             if (session != null) {
                 employeeId = (String) session.getAttribute("userId");
@@ -106,7 +100,7 @@ public class CheckServlet extends HttpServlet {
         );
 
         request.setAttribute("checks", checks);
-        request.setAttribute("employees", "Менеджер".equals(role) ? employeeDAO.getCashiersSorted() : List.of());
+        request.setAttribute("employees", "Manager".equals(role) ? employeeDAO.getCashiersSorted() : List.of());
         request.setAttribute("selectedEmployee", employeeId);
         request.setAttribute("dateFrom", dateFromStr);
         request.setAttribute("dateTo", dateToStr);
@@ -118,9 +112,8 @@ public class CheckServlet extends HttpServlet {
         String role = getRole(request);
         String action = request.getParameter("action");
 
-        // Видалення — лише менеджер
         if ("delete".equals(action)) {
-            if (!"Менеджер".equals(role)) {
+            if (!"Manager".equals(role)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
@@ -129,10 +122,9 @@ public class CheckServlet extends HttpServlet {
             return;
         }
 
-        // Створення чеку — лише касир (вимога: касир "здійснює продаж товарів")
         if ("add".equals(action)) {
-            if (!"Касир".equals(role)) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Створення чеків лише для касира");
+            if (!"Cashier".equals(role)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only cashiers are authorised to create new checks");
                 return;
             }
             try {
@@ -142,7 +134,7 @@ public class CheckServlet extends HttpServlet {
                 List<Sale> sales = parseSalesFromRequest(request, check);
                 checkDAO.createCheck(check, sales);
             } catch (RuntimeException e) {
-                renderCreateCheckForm(request, response, "Помилка: " + e.getMessage());
+                renderCreateCheckForm(request, response, "Error: " + e.getMessage());
                 return;
             }
             response.sendRedirect(request.getContextPath() + "/checks");
@@ -152,25 +144,19 @@ public class CheckServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/checks");
     }
 
-    // -------------------------------------------------------
     private Check buildCheckFromRequest(HttpServletRequest request, String cashierId) {
         Check c = new Check();
 
-        // АВТОГЕНЕРАЦІЯ НОМЕРА ЧЕКУ: номер чеку — це PK з AUTO_INCREMENT,
-        // тому касир його не вводить, а БД згенерує його сама (createCheck
-        // зчитує згенерований ключ через RETURN_GENERATED_KEYS).
         c.setCheckNumber(null);
 
         c.setIdEmployee(cashierId != null ? cashierId : request.getParameter("id_employee"));
         c.setCardNumber(blankToNull(request.getParameter("card_number")));
         c.setPrintDate(new Timestamp(System.currentTimeMillis()));
 
-        // Розраховуємо суму і ПДВ з позицій продажу
         BigDecimal sumTotal = BigDecimal.ZERO;
         String[] upcs = request.getParameterValues("item_upc");
         String[] qtys = request.getParameterValues("item_qty");
 
-        // Знижка по картці клієнта
         BigDecimal discountRate = BigDecimal.ZERO;
         if (c.getCardNumber() != null) {
             CustomerCard card = customerCardDAO.getById(c.getCardNumber());
@@ -182,7 +168,6 @@ public class CheckServlet extends HttpServlet {
         if (upcs != null) {
             for (int i = 0; i < upcs.length; i++) {
                 String upc = upcs[i].trim();
-                // 2. Захист: якщо випадково залишили порожній рядок товару у формі — пропускаємо його
                 if (upc.isEmpty()) continue;
 
                 int qty = Integer.parseInt(qtys[i]);
@@ -194,7 +179,6 @@ public class CheckServlet extends HttpServlet {
             }
         }
 
-        // Застосовуємо знижку по картці
         if (discountRate.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal discount = sumTotal.multiply(discountRate);
             sumTotal = sumTotal.subtract(discount);
@@ -218,7 +202,7 @@ public class CheckServlet extends HttpServlet {
             if (upc.isEmpty()) continue;
             int qty = Integer.parseInt(qtys[i]);
             StoreProduct sp = storeProductDAO.getByUpc(upc);
-            if (sp == null) throw new RuntimeException("Товар з UPC " + upc + " не знайдено");
+            if (sp == null) throw new RuntimeException("Product with UPC " + upc + " not found");
             Sale sale = new Sale();
             sale.setUpc(upc);
             sale.setCheckNumber(check.getCheckNumber());
@@ -233,11 +217,11 @@ public class CheckServlet extends HttpServlet {
         List<CustomerCard> cards = customerCardDAO.getAllCardsSorted();
         List<StoreProduct> storeProducts = storeProductDAO.searchStoreProducts(null, "name_asc");
 
-        StringBuilder cardOptions = new StringBuilder("<option value=\"\">Без картки</option>");
+        StringBuilder cardOptions = new StringBuilder("<option value=\"\">No card</option>");
         for (CustomerCard c : cards) {
             cardOptions.append("<option value=\"").append(HtmlPage.esc(c.getCardNumber())).append("\">")
                     .append(HtmlPage.esc(c.getCardNumber() + " — " + c.getCustSurname() + " " + c.getCustName()
-                            + " (" + c.getPercent() + "% знижки)"))
+                            + " (" + c.getPercent() + "% discount)"))
                     .append("</option>");
         }
 
@@ -247,7 +231,7 @@ public class CheckServlet extends HttpServlet {
                 productOptions.append("<option value=\"").append(HtmlPage.esc(sp.getUpc())).append("\" data-price=\"")
                         .append(sp.getSellingPrice()).append("\">")
                         .append(HtmlPage.esc(sp.getUpc() + " — " + sp.getProductName()
-                                + " (ціна: " + sp.getSellingPrice() + " грн, залишок: " + sp.getProductsNumber() + ")"))
+                                + " (price: " + sp.getSellingPrice() + " UAH, left in stock: " + sp.getProductsNumber() + ")"))
                         .append("</option>");
             }
         }
@@ -260,38 +244,38 @@ public class CheckServlet extends HttpServlet {
                     <form method="post" action="checks" id="checkForm" class="row g-3">
                       <input type="hidden" name="action" value="add">
                       <div class="col-md-6">
-                        <label class="form-label">Картка клієнта (необов'язково)</label>
+                        <label class="form-label">Client card (optional)</label>
                         <select class="form-select" name="card_number" id="cardSelect">%s</select>
                       </div>
                       <div class="col-12">
-                        <label class="form-label fw-bold">Товари</label>
+                        <label class="form-label fw-bold">Products</label>
                         <div id="itemsContainer">
                           <div class="row g-2 mb-2 item-row">
                             <div class="col-md-7">
                               <select class="form-select" name="item_upc" required>
-                                <option value="">Оберіть товар</option>
+                                <option value="">Pick the product</option>
                                 %s
                               </select>
                             </div>
                             <div class="col-md-3">
-                              <input type="number" class="form-control" name="item_qty" value="1" min="1" placeholder="Кількість" required>
+                              <input type="number" class="form-control" name="item_qty" value="1" min="1" placeholder="Amount" required>
                             </div>
                             <div class="col-md-2">
                               <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.item-row').remove(); updateTotal()">✕</button>
                             </div>
                           </div>
                         </div>
-                        <button type="button" class="btn btn-outline-primary mt-2" onclick="addItem()">＋ Додати товар</button>
+                        <button type="button" class="btn btn-outline-primary mt-2" onclick="addItem()">＋ Add product</button>
                       </div>
                       <div class="col-12">
                         <div class="alert alert-info">
-                          <strong>Загальна сума:</strong> <span id="totalDisplay">0.00</span> грн
-                          (ПДВ: <span id="vatDisplay">0.00</span> грн)
+                          <strong>Total price:</strong> <span id="totalDisplay">0.00</span> UAH
+                          (VAT: <span id="vatDisplay">0.00</span> UAH)
                         </div>
                       </div>
                       <div class="col-12 d-flex gap-2">
-                        <button class="btn btn-success btn-lg" type="submit">🧾 Оформити чек</button>
-                        <a class="btn btn-outline-secondary" href="checks">Скасувати</a>
+                        <button class="btn btn-success btn-lg" type="submit">🧾 Submit check</button>
+                        <a class="btn btn-outline-secondary" href="checks">Cancel</a>
                       </div>
                     </form>
                   </div>
@@ -322,7 +306,7 @@ public class CheckServlet extends HttpServlet {
                 document.getElementById('itemsContainer').addEventListener('input', updateTotal);
                 </script>
                 """.formatted(errorHtml, cardOptions, productOptions);
-        HtmlPage.render(response, "Новий чек", body, request.getContextPath() + "/checks");
+        HtmlPage.render(response, "New check", body, request.getContextPath() + "/checks");
     }
 
     private void renderDetail(HttpServletRequest request, HttpServletResponse response, String checkId) throws IOException {
@@ -337,7 +321,7 @@ public class CheckServlet extends HttpServlet {
                     .append(HtmlPage.esc(sale.getSellingPrice().multiply(BigDecimal.valueOf(sale.getProductNumber())))).append("</td></tr>");
         }
         String printBtn = """
-                <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Друк</button>
+                <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
                 """;
         String body = """
                 <div class="d-flex gap-2 mb-3 no-print">
@@ -345,20 +329,20 @@ public class CheckServlet extends HttpServlet {
                 </div>
                 <div class="card shadow-sm mb-4" id="printArea">
                   <div class="card-body">
-                    <h4 class="text-center mb-3">ЧЕКА № %s</h4>
+                    <h4 class="text-center mb-3">Check № %s</h4>
                     <div class="row g-3">
-                      <div class="col-md-4"><strong>Касир:</strong> %s</div>
-                      <div class="col-md-4"><strong>Картка:</strong> %s</div>
-                      <div class="col-md-4"><strong>Дата:</strong> %s</div>
+                      <div class="col-md-4"><strong>Cashier:</strong> %s</div>
+                      <div class="col-md-4"><strong>Card:</strong> %s</div>
+                      <div class="col-md-4"><strong>Date:</strong> %s</div>
                     </div>
                     <hr>
                     <table class="table table-bordered">
-                      <thead><tr><th>UPC</th><th>Товар</th><th>К-сть</th><th>Ціна</th><th>Сума</th></tr></thead>
+                      <thead><tr><th>UPC</th><th>Product</th><th>Amount</th><th>Price</th><th>Total</th></tr></thead>
                       <tbody>%s</tbody>
                     </table>
                     <div class="text-end fw-bold">
-                      <div>ПДВ (20%%): %s грн</div>
-                      <div class="fs-5">До сплати: %s грн</div>
+                      <div>VAT (20%%): %s UAH</div>
+                      <div class="fs-5">Total due: %s UAH</div>
                     </div>
                   </div>
                 </div>
@@ -373,7 +357,7 @@ public class CheckServlet extends HttpServlet {
                 HtmlPage.esc(check == null ? "" : check.getVat()),
                 HtmlPage.esc(check == null ? "" : check.getSumTotal())
         );
-        HtmlPage.render(response, "Деталі чеку", body, request.getContextPath() + "/checks");
+        HtmlPage.render(response, "Check details", body, request.getContextPath() + "/checks");
     }
 
     private void renderStats(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -391,7 +375,7 @@ public class CheckServlet extends HttpServlet {
         List<Employee> cashiers = employeeDAO.getCashiersSorted();
         List<StoreProduct> products = storeProductDAO.getAllStoreProductsSortedByQty();
 
-        StringBuilder cashierOptions = new StringBuilder("<option value=\"\">Усі касири</option>");
+        StringBuilder cashierOptions = new StringBuilder("<option value=\"\">All cashiers</option>");
         for (Employee e : cashiers) {
             boolean sel = e.getIdEmployee().equals(employeeId);
             cashierOptions.append("<option value=\"").append(HtmlPage.esc(e.getIdEmployee())).append("\"")
@@ -399,7 +383,7 @@ public class CheckServlet extends HttpServlet {
                     .append(HtmlPage.esc(e.getEmplSurname() + " " + e.getEmplName())).append("</option>");
         }
 
-        StringBuilder productOptions = new StringBuilder("<option value=\"\">Оберіть товар</option>");
+        StringBuilder productOptions = new StringBuilder("<option value=\"\">Pick the product</option>");
         for (StoreProduct sp : products) {
             boolean sel = sp.getUpc().equals(upc);
             productOptions.append("<option value=\"").append(HtmlPage.esc(sp.getUpc())).append("\"")
@@ -407,48 +391,46 @@ public class CheckServlet extends HttpServlet {
                     .append(HtmlPage.esc(sp.getUpc() + " — " + sp.getProductName())).append("</option>");
         }
 
-        String unitsResult = upc != null ? "<div class=\"alert alert-info\">Кількість одиниць товару <strong>" +
-                HtmlPage.esc(upc) + "</strong> за вибраний період: <strong>" + totalUnits + "</strong></div>" : "";
+        String unitsResult = upc != null ? "<div class=\"alert alert-info\">Product units total <strong>" +
+                HtmlPage.esc(upc) + "</strong> period: <strong>" + totalUnits + "</strong></div>" : "";
 
         String body = """
                 <div class="card shadow-sm mb-4">
-                  <div class="card-header fw-bold">Аналітика продажів (Менеджер)</div>
+                  <div class="card-header fw-bold">Sales analyses (Manager)</div>
                   <div class="card-body">
                     <form method="get" action="checks" class="row g-3">
                       <input type="hidden" name="action" value="stats">
                       <div class="col-md-4">
-                        <label class="form-label">Касир</label>
+                        <label class="form-label">Cashier</label>
                         <select class="form-select" name="employeeId">%s</select>
                       </div>
                       <div class="col-md-4">
-                        <label class="form-label">Дата від</label>
+                        <label class="form-label">Date from</label>
                         <input type="date" class="form-control" name="dateFrom" value="%s">
                       </div>
                       <div class="col-md-4">
-                        <label class="form-label">Дата до</label>
+                        <label class="form-label">Date to</label>
                         <input type="date" class="form-control" name="dateTo" value="%s">
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label">Товар (для підрахунку кількості)</label>
+                        <label class="form-label">Product</label>
                         <select class="form-select" name="upc">%s</select>
                       </div>
                       <div class="col-12">
-                        <button class="btn btn-primary" type="submit">Розрахувати</button>
+                        <button class="btn btn-primary" type="submit">Analyse</button>
                       </div>
                     </form>
                   </div>
                 </div>
                 <div class="alert alert-success fs-5">
-                  Загальна сума продажів: <strong>%s грн</strong>
+                  Total sales: <strong>%s UAH</strong>
                 </div>
                 %s
                 """.formatted(
                 cashierOptions, nvl(dateFromStr), nvl(dateToStr), productOptions,
                 totalSum.setScale(2, RoundingMode.HALF_UP), unitsResult);
-        HtmlPage.render(response, "Аналітика продажів", body, request.getContextPath() + "/checks");
+        HtmlPage.render(response, "Sales analyses", body, request.getContextPath() + "/checks");
     }
-
-    // -------------------------------------------------------
 
     private String getRole(HttpServletRequest request) {
         HttpSession session = request.getSession(false);

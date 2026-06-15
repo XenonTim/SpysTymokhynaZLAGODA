@@ -12,8 +12,8 @@ import java.io.IOException;
 /**
  * Картки клієнтів.
  * Доступ:
- * - МЕНЕДЖЕР: CRUD + фільтрація по відсотку знижки (п.12)
- * - КАСИР: перегляд, додавання, редагування (п.6, п.8)
+ * - МЕНЕДЖЕР: CRUD + фільтрація по відсотку знижки.
+ * - КАСИР: перегляд, додавання, редагування.
  * Видалення — лише менеджер.
  */
 @WebServlet("/customers")
@@ -31,8 +31,8 @@ public class CustomerServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("delete".equals(action)) {
-            if (!"Менеджер".equals(role)) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Видалення карток лише для менеджера");
+            if (!"Manager".equals(role)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Only management is authorised to delete cards");
                 return;
             }
             customerCardDAO.deleteCard(request.getParameter("id"));
@@ -46,7 +46,6 @@ public class CustomerServlet extends HttpServlet {
             return;
         }
 
-        // Фільтр по відсотку (вимога менеджера п.12: клієнти з певним відсотком)
         Integer percentFilter = null;
         String percentStr = request.getParameter("percent");
         if (percentStr != null && !percentStr.isBlank()) {
@@ -69,7 +68,7 @@ public class CustomerServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("delete".equals(action)) {
-            if (!"Менеджер".equals(role)) {
+            if (!"Manager".equals(role)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
@@ -96,10 +95,10 @@ public class CustomerServlet extends HttpServlet {
 
     private String validateCard(CustomerCard card) {
         if (card.getPhoneNumber() != null && card.getPhoneNumber().length() > 13) {
-            return "Номер телефону не може перевищувати 13 символів";
+            return "Phone number can not be longer than 13 characters";
         }
         if (card.getPercent() < 0 || card.getPercent() > 100) {
-            return "Відсоток знижки повинен бути від 0 до 100";
+            return "Discount percantage must be between 0 and 100";
         }
         return null;
     }
@@ -133,17 +132,17 @@ public class CustomerServlet extends HttpServlet {
                     <form method="post" action="customers" class="row g-3">
                       <input type="hidden" name="action" value="%s">
                       %s
-                      <div class="col-md-4"><label class="form-label">Прізвище</label><input class="form-control" name="cust_surname" required value="%s"></div>
-                      <div class="col-md-4"><label class="form-label">Ім'я</label><input class="form-control" name="cust_name" required value="%s"></div>
-                      <div class="col-md-4"><label class="form-label">По батькові</label><input class="form-control" name="cust_patronymic" value="%s"></div>
-                      <div class="col-md-4"><label class="form-label">Телефон (до 13 симв.)</label><input class="form-control" name="phone_number" maxlength="13" required value="%s"></div>
-                      <div class="col-md-4"><label class="form-label">Місто</label><input class="form-control" name="city" value="%s"></div>
-                      <div class="col-md-4"><label class="form-label">Вулиця</label><input class="form-control" name="street" value="%s"></div>
-                      <div class="col-md-4"><label class="form-label">Індекс</label><input class="form-control" name="zip_code" value="%s"></div>
-                      <div class="col-md-4"><label class="form-label">Відсоток знижки (%%)</label><input class="form-control" name="percent" type="number" min="0" max="100" required value="%s"></div>
+                      <div class="col-md-4"><label class="form-label">Surname</label><input class="form-control" name="cust_surname" required value="%s"></div>
+                      <div class="col-md-4"><label class="form-label">Name</label><input class="form-control" name="cust_name" required value="%s"></div>
+                      <div class="col-md-4"><label class="form-label">Patronymic</label><input class="form-control" name="cust_patronymic" value="%s"></div>
+                      <div class="col-md-4"><label class="form-label">Phone number (up to 13 symbols)</label><input class="form-control" name="phone_number" maxlength="13" required value="%s"></div>
+                      <div class="col-md-4"><label class="form-label">City</label><input class="form-control" name="city" value="%s"></div>
+                      <div class="col-md-4"><label class="form-label">Street</label><input class="form-control" name="street" value="%s"></div>
+                      <div class="col-md-4"><label class="form-label">Zip code</label><input class="form-control" name="zip_code" value="%s"></div>
+                      <div class="col-md-4"><label class="form-label">Discount percantage (%%)</label><input class="form-control" name="percent" type="number" min="0" max="100" required value="%s"></div>
                       <div class="col-12 d-flex gap-2">
-                        <button class="btn btn-primary" type="submit">Зберегти</button>
-                        <a class="btn btn-outline-secondary" href="customers">Скасувати</a>
+                        <button class="btn btn-primary" type="submit">Save</button>
+                        <a class="btn btn-outline-secondary" href="customers">Cancel</a>
                       </div>
                     </form>
                   </div>
@@ -158,7 +157,7 @@ public class CustomerServlet extends HttpServlet {
                 cc == null ? "" : HtmlPage.esc(cc.getZipCode()),
                 cc == null ? "0" : HtmlPage.esc(cc.getPercent()));
         HtmlPage.render(response, cc == null || cc.getCardNumber() == null
-                        ? "Нова карта клієнта" : "Редагування карти клієнта",
+                        ? "New client card" : "Edit client card",
                 body, request.getContextPath() + "/customers");
     }
 

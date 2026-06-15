@@ -21,7 +21,7 @@ public class EmployeeServlet extends HttpServlet {
             throws ServletException, IOException {
 
         if (!isManager(request)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ лише для менеджера");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access only for management");
             return;
         }
 
@@ -62,7 +62,7 @@ public class EmployeeServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         if (!isManager(request)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ лише для менеджера");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access only for management");
             return;
         }
 
@@ -76,12 +76,10 @@ public class EmployeeServlet extends HttpServlet {
         Employee emp = fromRequest(request);
         String error = validateEmployee(emp);
 
-        // Якщо є помилка валідації — повертаємо користувача на форму з повідомленням
         if (error != null) {
             request.setAttribute("error", error);
             request.setAttribute("employeeToEdit", emp);
             request.setAttribute("showForm", true);
-            // Підтягуємо список, щоб фонова таблиця (якщо вона є) не зникла
             request.setAttribute("employeesList", employeeDAO.getAllEmployeesSorted());
             request.getRequestDispatcher("/index.jsp?page=employees").forward(request, response);
             return;
@@ -97,21 +95,21 @@ public class EmployeeServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/employees");
     }
 
-    // --- Допоміжні методи ---
+    // Допоміжні методи
 
     private String validateEmployee(Employee emp) {
         if (emp.getDateOfBirth() != null) {
             LocalDate dob = emp.getDateOfBirth().toLocalDate();
             int age = Period.between(dob, LocalDate.now()).getYears();
             if (age < 18) {
-                return "Вік працівника повинен бути не менше 18 років.";
+                return "Employee has to be of at least 18 years old.";
             }
         }
         if (emp.getPhoneNumber() != null && emp.getPhoneNumber().length() > 13) {
-            return "Номер телефону не може перевищувати 13 символів (включаючи «+»).";
+            return "Phone number cannot be longer than 13 characters(«+» included).";
         }
         if (emp.getSalary() != null && emp.getSalary().signum() < 0) {
-            return "Зарплата не може бути від'ємною.";
+            return "Salary cannot be negative.";
         }
         return null;
     }
@@ -146,7 +144,7 @@ public class EmployeeServlet extends HttpServlet {
     private boolean isManager(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) return false;
-        return "Менеджер".equals(session.getAttribute("userRole"));
+        return "Manager".equals(session.getAttribute("userRole"));
     }
 
     private String blankToNull(String s) {

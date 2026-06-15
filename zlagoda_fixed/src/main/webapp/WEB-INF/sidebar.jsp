@@ -3,17 +3,16 @@
 <link href="css/styles.css" rel="stylesheet">
 
 <div class="d-flex flex-column flex-shrink-0 p-3 custom-sidebar border-end"
-     style="width: 280px; min-height: calc(100vh - 90px);">
+     style="width: 280px; height: calc(100vh - 90px); position: fixed; left: 0; top: 50px; overflow-y: auto; z-index: 1020;">
 
   <ul class="nav nav-pills flex-column mb-auto">
 
-    <%-- Товари (Products) — доступно всім --%>
     <li class="mb-2">
       <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 fw-semibold text-dark w-100 text-start justify-content-between px-2 py-2"
               data-bs-toggle="collapse"
               data-bs-target="#product-collapse"
               aria-expanded="true">
-        <span><i class="bi bi-box-seam me-2"></i>Товари</span>
+        <span><i class="bi bi-box-seam me-2"></i>Products</span>
         <i class="bi bi-chevron-down small text-muted"></i>
       </button>
 
@@ -22,64 +21,59 @@
           <li class="mb-1">
             <a href="${pageContext.request.contextPath}/categories"
                class="nav-link link-dark rounded py-1">
-              <i class="bi bi-tag me-1"></i> Категорії
+              <i class="bi bi-tag me-1"></i> Categories
             </a>
           </li>
           <li class="mb-1">
             <a href="${pageContext.request.contextPath}/products"
                class="nav-link link-dark rounded py-1">
-              <i class="bi bi-archive me-1"></i> Товари
+              <i class="bi bi-archive me-1"></i> Products
             </a>
           </li>
           <li class="mb-1">
             <a href="${pageContext.request.contextPath}/store-products"
                class="nav-link link-dark rounded py-1">
-              <i class="bi bi-shop me-1"></i> Товари у магазині
+              <i class="bi bi-shop me-1"></i> Products in stock
             </a>
           </li>
         </ul>
       </div>
     </li>
 
-    <%-- Чеки — доступно всім --%>
     <li class="nav-item mb-1">
       <a href="${pageContext.request.contextPath}/checks"
          class="nav-link link-dark d-flex align-items-center py-2">
-        <i class="bi bi-receipt me-2"></i> Чеки
+        <i class="bi bi-receipt me-2"></i> Checks
       </a>
     </li>
 
-    <%-- Позиції продажів — ТІЛЬКИ менеджер (технічна/адмін сторінка, не для касира) --%>
-    <c:if test="${sessionScope.userRole == 'Менеджер'}">
+    <c:if test="${sessionScope.userRole == 'Manager'}">
       <li class="nav-item mb-1">
         <a href="${pageContext.request.contextPath}/sales"
            class="nav-link link-dark d-flex align-items-center py-2">
-          <i class="bi bi-table me-2"></i> Позиції продажів
+          <i class="bi bi-table me-2"></i> Sales
         </a>
       </li>
     </c:if>
 
-    <%-- Клієнти — доступно всім --%>
     <li class="nav-item mb-1">
       <a href="${pageContext.request.contextPath}/customers"
          class="nav-link link-dark d-flex align-items-center py-2">
-        <i class="bi bi-people me-2"></i> Клієнти
+        <i class="bi bi-people me-2"></i> Clients
       </a>
     </li>
 
-    <%-- Працівники — ТІЛЬКИ менеджер --%>
-    <c:if test="${sessionScope.userRole == 'Менеджер'}">
+    <c:if test="${sessionScope.userRole == 'Manager'}">
       <li class="nav-item mb-1">
         <a href="${pageContext.request.contextPath}/employees"
            class="nav-link link-dark d-flex align-items-center py-2">
-          <i class="bi bi-person-badge me-2"></i> Працівники
+          <i class="bi bi-person-badge me-2"></i> Employees
         </a>
       </li>
     </c:if>
 
   </ul>
 
-  <%-- Інформація про поточного користувача внизу сайдбару --%>
   <div class="mt-auto pt-3 border-top">
     <div class="d-flex align-items-center gap-2">
       <i class="bi bi-person-circle fs-4 text-muted"></i>

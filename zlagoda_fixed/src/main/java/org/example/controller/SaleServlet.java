@@ -25,7 +25,7 @@ public class SaleServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String role = getRole(request);
 
-        if ("Касир".equals(role)) {
+        if ("Cashier".equals(role)) {
             response.sendRedirect(request.getContextPath() + "/checks");
             return;
         }
@@ -39,19 +39,18 @@ public class SaleServlet extends HttpServlet {
             }
             Sale saleToEdit = null;
             if ("edit".equals(action)) {
-                // Логіка отримання конкретної позиції
             }
             renderForm(request, response, saleToEdit);
             return;
         }
 
-        request.setAttribute("salesList", saleDAO.searchSales(request.getParameter("searchQuery"), request.getParameter("sortBy")));
+        request.setAttribute("sales", saleDAO.searchSales(request.getParameter("searchQuery"), request.getParameter("sortBy")));
         request.getRequestDispatcher("/index.jsp?page=sales").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (!"Менеджер".equals(getRole(request))) {
+        if (!"Manager".equals(getRole(request))) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -78,7 +77,7 @@ public class SaleServlet extends HttpServlet {
                 : "";
 
         List<StoreProduct> products = storeProductDAO.getAllStoreProductsSortedByQty();
-        StringBuilder upcOptions = new StringBuilder("<option value=\"\">Оберіть товар</option>");
+        StringBuilder upcOptions = new StringBuilder("<option value=\"\">Pick the product</option>");
         for (StoreProduct sp : products) {
             boolean selected = sale != null && sp.getUpc().equals(sale.getUpc());
             upcOptions.append("<option value=\"").append(HtmlPage.esc(sp.getUpc())).append("\"")
@@ -93,26 +92,26 @@ public class SaleServlet extends HttpServlet {
                       <input type="hidden" name="action" value="%s">
                       %s
                       <div class="col-md-6">
-                        <label class="form-label">Номер чеку</label>
+                        <label class="form-label">Check ID</label>
                         <input class="form-control" name="check_number" required value="%s" %s>
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label">Товар у магазині</label>
+                        <label class="form-label">Product in stock</label>
                         <select class="form-select" name="upc" required %s>
                             %s
                         </select>
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label">Кількість</label>
+                        <label class="form-label">Amount</label>
                         <input class="form-control" name="product_number" type="number" min="1" required value="%s">
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label">Ціна продажу</label>
+                        <label class="form-label">Selling price</label>
                         <input class="form-control" name="selling_price" type="number" step="0.01" min="0" required value="%s">
                       </div>
                       <div class="col-12 d-flex gap-2">
-                        <button class="btn btn-primary" type="submit">Зберегти</button>
-                        <a class="btn btn-outline-secondary" href="sales">Скасувати</a>
+                        <button class="btn btn-primary" type="submit">Save</button>
+                        <a class="btn btn-outline-secondary" href="sales">Cancel</a>
                       </div>
                     </form>
                   </div>
@@ -127,7 +126,7 @@ public class SaleServlet extends HttpServlet {
                 sale == null ? "0.00" : HtmlPage.esc(sale.getSellingPrice()));
 
         HtmlPage.render(response,
-                sale == null ? "Нова позиція продажу" : "Редагування позиції продажу",
+                sale == null ? "New sales item" : "Edit sales item",
                 body, request.getContextPath() + "/sales");
     }
 
