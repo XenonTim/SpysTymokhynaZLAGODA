@@ -45,19 +45,4 @@ VAT calculation (20%) included in all prices
 Filtering and sorting across all sections
 Print preview for reports (opens in a separate window, no browser UI elements)
 Individual check receipt printing in A5 format
-Project Structure
-src/
-├── main/
-│   ├── java/org/example/
-│   │   ├── controller/   — Servlets (one per entity)
-│   │   ├── dao/          — Database access layer
-│   │   ├── model/        — Entity classes
-│   │   ├── filter/       — Authentication filter
-│   │   └── util/         — DBManager, HtmlPage, PasswordUtil
-│   ├── resources/db/
-│   │   ├── schema.sql    — Table definitions
-│   │   └── data.sql      — Sample data
-│   └── webapp/
-│       ├── WEB-INF/pages/ — JSP pages
-│       ├── js/            — print-report.js
-│       └── css/           — styles.css переклади цей текст на українську де треба
+
