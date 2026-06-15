@@ -44,7 +44,7 @@ street VARCHAR(50) NOT NULL,
 zip_code VARCHAR(9) NOT NULL,
 PRIMARY KEY (id_employee),
 CONSTRAINT chk_employee_salary CHECK (salary >= 0),
-CONSTRAINT chk_employee_age CHECK (date_of_birth <= DATE_SUB(CURDATE(), INTERVAL 18 YEAR))
+CONSTRAINT chk_employee_birth_year CHECK (YEAR(date_of_birth) <= 2008)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE User_Auth (

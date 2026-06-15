@@ -92,13 +92,6 @@ INSERT INTO Sale (UPC,check_number,product_number,selling_price) VALUES
 (1000000010,10001,3,36),
 (1000000010,10008,2,36);
 
-
--- ВИПРАВЛЕНО: попередні значення password_hash були "випадковими" рядками
--- (не відповідали жодному паролю через SHA-256+Base64, тому вхід у систему
--- був неможливим для жодного користувача).
--- Для всіх тестових облікових записів встановлено єдиний пароль "password123"
--- (PasswordUtil.hashPassword("password123") = Base64(SHA-256("password123")))
--- — відповідно до README.md.
 INSERT INTO User_Auth (id_employee, password_hash) VALUES
 (101, '75K3eLr+dx6JJFuJ7LwIpEpOFmwGZZkRiB84PURz6U8='), -- пароль: password123
 (102, '75K3eLr+dx6JJFuJ7LwIpEpOFmwGZZkRiB84PURz6U8='), -- пароль: password123

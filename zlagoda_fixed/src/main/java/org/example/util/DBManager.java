@@ -14,10 +14,9 @@ public class DBManager {
     }
 
     public static Connection getConnection() throws Exception {
-        // Пряме підключення без використання файлу db.properties
         String url = "jdbc:mysql://localhost:3306/ais_shop?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useUnicode=true";
         String user = "root";
-        String password = "1234"; // Якщо твій пароль насправді порожній, залиш тут просто ""
+        String password = "password";
 
         return DriverManager.getConnection(url, user, password);
     }
